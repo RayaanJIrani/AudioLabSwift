@@ -13,6 +13,7 @@
 import Foundation
 import Accelerate
 
+/// AudioModel Class - Handles Interaction With Novocaine
 class AudioModel {
     
     // ================
@@ -28,22 +29,23 @@ class AudioModel {
     var frozenTimeData:[Float]
     var peak1Freq:Float = 0.0
     var peak2Freq:Float = 0.0
-    
-    
     private var weights:[Float]
     private var weightsSum:Float
     private var prevMaxTimeData:[Float] = []
+    private var lookback:Int
+    
     // ====================
     // MARK: Public Methods
     // ====================
-    private var lookback:Int
-    private func weightFunc(x:Float,numVals:Int) -> Float{
-//        return Float(((-1 * x) + numVals)/Float(numVals))
+    
+    /// Weight Function For Lookback
+    private func weightFunc(x:Float, numVals:Int) -> Float{
+        // return Float(((-1 * x) + numVals) / Float(numVals))
         return ((-1 * x) + Float(numVals + 1)) / Float(numVals + 1)
     }
-    // Anything Not Lazily Instantiated Should Be Allocated Here
-    ///Initialize audio model with buffer size and lookback window for weighted average of previous sound values
-    init(buffer_size:Int,lookback:Int=10) {
+
+    /// Initialize AudioModel With Buffer Size, Lookback Window For Weighted Average Of Previous Sound Values - Anything Not Lazily Instantiated Should Be Allocated Here
+    init(buffer_size:Int, lookback:Int = 10) {
         BUFFER_SIZE = buffer_size
         timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE / 2)
@@ -53,14 +55,13 @@ class AudioModel {
         frozenTimeData = []
         self.lookback = lookback
         for i in 1...lookback {
-            let wt = weightFunc(x: Float(i),numVals: lookback)
+            let wt = weightFunc(x: Float(i), numVals: lookback)
             weights.append(wt)
             weightsSum += wt
         }
-        
     }
 
-    ///Populate self.peak1Freq and self.peak2Freq with a given windowSize for finding the max value
+    /// Populate self.peak1Freq and self.peak2Freq with a given windowSize for finding the max value
     public func calcLoudestSounds(windowSize:Int=3){
         var freqRes:Float = -10.0
         var peakLookup = Dictionary<Float, Int>(minimumCapacity: frozenFftData.count)
@@ -90,7 +91,7 @@ class AudioModel {
         self.peak2Freq = quadraticApprox(peakLocation: peak2Loc!, deltaF: freqRes)
         
     }
-    //Used to approximate the actual peak hz based on the points around the peak
+    /// Used to approximate the actual peak hz based on the points around the peak
     private func quadraticApprox(peakLocation:Int,deltaF:Float) -> Float {
         let m1 = frozenFftData[peakLocation-1]
         let m2 = frozenFftData[peakLocation]
@@ -100,7 +101,7 @@ class AudioModel {
         
         return f2 + ((m1-m2)/(m3 - 2 * m2 + m1)) * (deltaF / 2.0)
     }
-    ///Check if a sufficiently large sound was detected by the microphone (above a certain float threshold for average sin wave)
+    /// Check if a sufficiently large sound was detected by the microphone (above a certain float threshold for average sin wave)
     public func isLoudSound(cutoff:Float) -> Bool {
         var maxTimeVal:Float = 0.0
         vDSP_maxv(timeData, 1, &maxTimeVal, vDSP_Length(timeData.count))
@@ -125,7 +126,20 @@ class AudioModel {
         return isTrue
     }
     
-    // Obtain Local Averages (LHS, RHS)
+    /// Calculate, Return Maximum Decibel Value From FFT Data
+    func getMaxDecibels() -> Float {
+        
+        // Calculate Magnitude For Each Bin
+        let magnitudes = fftData.map { $0 * $0 }
+
+        // Calculate Decibel Value For Each Magnitude
+        let decibels = magnitudes.map { 20.0 * log10(sqrt($0) + 1e-9) }
+
+        // Return Maximum Decibel Value
+        return decibels.max() ?? -Float.infinity
+    }
+    
+    /// Obtain Local Averages (LHS, RHS)
     func localAverages(sliderFreq:Float) -> (Float, Float) {
         
         // Calculate FFT Index (Frequency (k) * N / Sampling Frequency)
@@ -143,7 +157,7 @@ class AudioModel {
         return (abs(lhsAvg), abs(rhsAvg))
     }
     
-    // Public Function For Starting Processing Microphone Data
+    /// Public Function For Starting Processing Microphone Data
     func startMicrophoneProcessing(withFps:Double) {
 
         // Setup Microphone For Copy To Circular Buffer
@@ -159,7 +173,7 @@ class AudioModel {
         }
     }
     
-    // Public Function For Starting Processing For Both Microphone, Speaker Data
+    /// Public Function For Starting Processing For Both Microphone, Speaker Data
     func startDualProcessing(withFps:Double, withFreq:Float = 17500.0) {
         
         // Setup Microphone, Speaker For Copy To Circular Buffer
@@ -182,22 +196,22 @@ class AudioModel {
         }
     }
     
-    // Set Inaudible Tone Frequency
+    /// Set Inaudible Tone Frequency
     func setToneFrequency(_ frequency: Float) {
         sineFrequency = frequency
     }
     
-    // Get Circular Buffer
+    /// Get Circular Buffer
     func retrieveInputBuffer() -> CircularBuffer? {
         return inputBuffer
     }
     
-    // Start Handling Audio
+    /// Start Handling Audio
     func play() {
         self.audioManager?.play()
     }
     
-    // Stop Handling Audio
+    /// Stop Handling Audio
     func pause(){
         self.audioManager?.pause()
     }
@@ -206,19 +220,20 @@ class AudioModel {
     // MARK: Private Properties
     // ========================
     
-    // Instantiate Novocaine AudioManager
+    /// Instantiate Novocaine AudioManager
     private lazy var audioManager:Novocaine? = {
         return Novocaine.audioManager()
     }()
     
-    // Instantiate FFTHelper
+    /// Instantiate FFTHelper
     private lazy var fftHelper:FFTHelper? = {
         return FFTHelper.init(fftSize: Int32(BUFFER_SIZE))
     }()
     
-    // Instantiate Input CircularBuffer (Input Buffer For AudioManager)
-    // Can Create More With This Logic If Necessary
+    /// Instantiate Input CircularBuffer (Input Buffer For AudioManager)
     private lazy var inputBuffer:CircularBuffer? = {
+        
+        // Can Create More With This Logic If Necessary
         return CircularBuffer.init(numChannels: Int64(self.audioManager!.numInputChannels),
                                    andBufferSize: Int64(BUFFER_SIZE))
     }()
@@ -227,8 +242,7 @@ class AudioModel {
     // MARK: Model Callback Methods
     // ============================
     
-    // Call This Every FPS Times Per Second
-    // See Timer That We Previously Created
+    /// Call This Every FPS Times Per Second
     private func runEveryInterval() {
         if inputBuffer != nil {
 
@@ -248,21 +262,18 @@ class AudioModel {
     // MARK: Audiocard Callbacks
     // =========================
     
-    // in obj-C it was (^InputBlock)(float *data, UInt32 numFrames, UInt32 numChannels)
-    // and in swift this translates to:
+    /// ObjC: (^InputBlock)(float * data, UInt32 numFrames, UInt32 numChannels) - Swift
     private func handleMicrophone (data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32) {
-        // copy samples from the microphone into circular buffer
+
+        // Copy Samples From Microphone Into Circular Buffer
         self.inputBuffer?.addNewFloatData(data, withNumSamples: Int64(numFrames))
     }
 
-    //    _     _     _     _     _     _     _     _     _     _
-    //   / \   / \   / \   / \   / \   / \   / \   / \   / \   /
-    //  /   \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/   \_/
-    var sineFrequency:Float = 0.0 { // frequency in Hz (changeable by user)
+    /// Frequency In Hertz (Changable By User)
+    var sineFrequency:Float = 0.0 {
         didSet{
             
-        // if using swift for generating the sine wave: when changed, we need to update our increment
-//                    phaseIncrement = Float(2*Double.pi*Double(sineFrequency)/manager.samplingRate)
+            // Set Sine Frequency From AudioManager
             self.audioManager?.sineFrequency = sineFrequency
         }
     }
@@ -273,36 +284,6 @@ class AudioModel {
     private var phase:Float = 0.0
     private var phaseIncrement:Float = 0.0
     private var sineWaveRepeatMax:Float = Float(2*Double.pi)
-    
-    // Calculate and return the maximum decibel value from FFT data
-    func getMaxDecibels() -> Float {
-        // Use Accelerate framework to calculate the maximum value in decibels
-//        var maxDecibels: Float = -Float.greatestFiniteMagnitude
-//        vDSP_maxv(fftData, 1, &maxDecibels, vDSP_Length(fftData.count))
-//
-//        // Convert from linear scale to decibels
-//        let maxDecibelsInLinearScale = 20 * log10f(maxDecibels)
-//        return maxDecibelsInLinearScale
-//        var magnitudeInDecibels = [Float](repeating: 0.0, count: fftData.count)
-//
-//        vDSP_vabs(fftData, 1, &magnitudeInDecibels, 1, vDSP_Length(fftData.count))
-//        var zero: Float = 0
-//        var maximumMagnitude: Float = 0
-//        vDSP_maxv(magnitudeInDecibels, 1, &maximumMagnitude, vDSP_Length(fftData.count))
-//
-//        // Calculate decibels: 20 * log10(maximumMagnitude)
-//        maximumMagnitude = maximumMagnitude < 1e-9 ? 1e-9 : maximumMagnitude  // Avoid log10(0) which is undefined
-//        let decibels = 20.0 * log10(maximumMagnitude)
-        
-        let magnitudeSquared = fftData.map { $0 * $0 }  // Calculate magnitude squared
-        let sumOfSquares = magnitudeSquared.reduce(0, +)
-        
-        // Calculate the maximum magnitude in decibels
-        let maximumMagnitude = sqrt(sumOfSquares / Float(fftData.count))
-        let decibels = 20.0 * log10(maximumMagnitude + 1e-9) // Avoid log10(0) which is undefined
-        
-        return decibels
-    }
     
     private func handleSpeakerQueryWithSinusoids(data:Optional<UnsafeMutablePointer<Float>>, numFrames:UInt32, numChannels: UInt32){
         // while pretty fast, this loop is still not quite as fast as

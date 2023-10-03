@@ -12,6 +12,7 @@
 // Import Statements
 import UIKit
 
+// Module B View Controller - Main Runner For View
 class ModuleBViewController: UIViewController {
     
     // Outlets Defined On Storyboard - Hopefully Self-Explanatory!
@@ -25,10 +26,6 @@ class ModuleBViewController: UIViewController {
     @IBAction func ToneSliderValueChanged(_ sender: UISlider) {
         audio.setToneFrequency(sender.value)
         
-//        // Reset For New Baseline Calculation
-//        sumArray = [0.0, 0.0]
-//        baselineCount = 0
-        
         // Update Slider Label Text With Current Slider Value
         tone_slider_label.text = String(format: "Tone Slider: %.2f kHz", sender.value / 1000.0)
     }
@@ -37,7 +34,6 @@ class ModuleBViewController: UIViewController {
     // (Structure With Any Constants Necessary To Run AudioModel)
     struct ModuleBAudioConstants {
         static let AUDIO_BUFFER_SIZE = 1024 * 4
-        static let BASELINE_COUNT = 128
     }
     
     // Create AudioModel Object With Specified Buffer Size
@@ -50,15 +46,6 @@ class ModuleBViewController: UIViewController {
     lazy var graph:MetalGraph? = {
         return MetalGraph(userView: self.graphView)
     }()
-    
-//    // Sums Over LHS / RHS
-//    var sumArray: [Float] = [0.0, 0.0]
-//
-//    // Target Peaks For LHS / RHS
-//    var peakArray: [Float] = [0.0, 0.0]
-//
-//    // Incrementor (To Constant)
-//    var baselineCount = 0
     
     // Runs When View Loads (With Super Method)
     override func viewDidLoad() {
@@ -99,25 +86,7 @@ class ModuleBViewController: UIViewController {
     @objc func updateView() {
         updateGraphs()
         updateMaxDecibels()
-        
-        // Unpack Side Averages From Model Call
-        let (lAvg, rAvg) = audio.localAverages(sliderFreq: tone_slider.value)
-        
-        measureDopplerEffect(lAvg: lAvg, rAvg: rAvg)
-        
-        // Create Baseline, Then Measure Doppler Effect
-//        if baselineCount < ModuleBAudioConstants.BASELINE_COUNT {
-//            sumArray = [sumArray[0] + lAvg, sumArray[1] + rAvg]
-//            gesture_label.text = "Establishing Baseline..."
-//        } else if baselineCount == ModuleBAudioConstants.BASELINE_COUNT {
-//            peakArray = [sumArray[0] / Float(ModuleBAudioConstants.BASELINE_COUNT),
-//                         sumArray[1] / Float(ModuleBAudioConstants.BASELINE_COUNT)]
-//        } else {
-//            measureDopplerEffect(lAvg: lAvg, rAvg: rAvg)
-//        }
-//
-//        // Increment Baseline Count
-//        baselineCount += 1
+        measureDopplerEffect()
     }
     
     // Update Graphs
@@ -132,10 +101,10 @@ class ModuleBViewController: UIViewController {
     }
     
     // Measure Doppler Effect Based On Baseline Calculation
-    private func measureDopplerEffect(lAvg:Float, rAvg:Float) {
-//        let changeLeftPeak = abs(lAvg - peakArray[0])
-//        let changeRightPeak = abs(rAvg - peakArray[1])
-//        let changePeak = abs(lAvg - rAvg)
+    private func measureDopplerEffect() {
+        
+        // Unpack Side Averages From Model Call
+        let (lAvg, rAvg) = audio.localAverages(sliderFreq: tone_slider.value)
         
         // Decide Gesture (Based On Range)
         if -3.65 < lAvg - rAvg && lAvg - rAvg < 6.35 {
@@ -145,13 +114,5 @@ class ModuleBViewController: UIViewController {
         } else {
             gesture_label.text = "Moving Farther!"
         }
-        
-//        if changePeak <= 0.07 {
-//            gesture_label.text = "Still"
-//        } else if changeRightPeak > changeLeftPeak{
-//            gesture_label.text = "Moving Closer!"
-//        } else if changeRightPeak > changeLeftPeak{
-//            gesture_label.text = "Moving Farther!"
-//        }
     }
 }

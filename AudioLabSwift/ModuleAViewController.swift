@@ -17,8 +17,6 @@ class ModuleAViewController: UIViewController {
     @IBOutlet weak var firstHzLabel: UILabel!
     //button to pause recording and make 2 other labels appear.
     @IBOutlet weak var secondHzLabel: UILabel!
-    @IBOutlet weak var lock_Hz_button: UIButton!
-    
     @IBOutlet weak var graphView: UIView!
     //This is the label gives the user instructions of how to use our screen
     @IBOutlet weak var module_1_desc_button: UILabel!
@@ -85,10 +83,6 @@ class ModuleAViewController: UIViewController {
             data: self.audio.timeData,
             forKey: "timeUnfrozen"
         )
-    }
-    
-    @IBAction func lockFreqPressed(_ sender: Any) {
-        module_1_desc_button.text = "Below are the 2 highest Hz  of the sound you made. Exit and return to this page to try a different sound"
     }
     
     /*

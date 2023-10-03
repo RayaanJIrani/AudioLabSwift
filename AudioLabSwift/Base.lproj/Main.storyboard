@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Root View Controller-->
+        <!--The best Audio Lab-->
         <scene sceneID="hT7-06-DAg">
             <objects>
                 <tableViewController id="vep-vq-q1Y" sceneMemberID="viewController">
@@ -68,7 +68,7 @@
                             <outlet property="delegate" destination="vep-vq-q1Y" id="nzW-OA-nhh"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="9sn-f9-IAD"/>
+                    <navigationItem key="navigationItem" title="The best Audio Lab" id="9sn-f9-IAD"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7GG-VL-MY1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -82,18 +82,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rir-nQ-MHm">
-                                <rect key="frame" x="132" y="141" width="150" height="35"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="150" id="aX2-un-Y81"/>
-                                </constraints>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="gray" title="Lock Frequency!"/>
-                                <connections>
-                                    <action selector="lockFreqPressed:" destination="aRf-vc-GSu" eventType="touchUpInside" id="csV-bt-TYy"/>
-                                </connections>
-                            </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="The Microphone is listening! Lock the frequency to see the 2 highest Hz values!" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xTE-jl-s1X">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="The Microphone is listening! Make a sound!  See the 2 highest Hz values of the sound you made!" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xTE-jl-s1X">
                                 <rect key="frame" x="0.0" y="92" width="414" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
@@ -130,19 +119,16 @@
                             <constraint firstItem="fhK-Ta-9ko" firstAttribute="trailing" secondItem="17o-EH-G9Y" secondAttribute="trailing" constant="46" id="cka-7P-jv4"/>
                             <constraint firstItem="Cm4-xc-Uh2" firstAttribute="leading" secondItem="fhK-Ta-9ko" secondAttribute="leading" constant="47" id="dLa-vU-zEB"/>
                             <constraint firstItem="Ci3-Zq-xzL" firstAttribute="centerX" secondItem="xTE-jl-s1X" secondAttribute="centerX" id="ipa-uD-S3j"/>
+                            <constraint firstItem="Ci3-Zq-xzL" firstAttribute="top" secondItem="xTE-jl-s1X" secondAttribute="bottom" constant="51" id="kEp-QR-J8f"/>
                             <constraint firstItem="fhK-Ta-9ko" firstAttribute="trailing" secondItem="Cm4-xc-Uh2" secondAttribute="trailing" constant="46" id="ohN-lo-vWu"/>
                             <constraint firstItem="xTE-jl-s1X" firstAttribute="leading" secondItem="fhK-Ta-9ko" secondAttribute="leading" id="uZK-a8-iRe"/>
                             <constraint firstItem="17o-EH-G9Y" firstAttribute="top" secondItem="Cm4-xc-Uh2" secondAttribute="bottom" constant="40" id="vvL-sG-IbY"/>
-                            <constraint firstItem="rir-nQ-MHm" firstAttribute="centerX" secondItem="xTE-jl-s1X" secondAttribute="centerX" id="wCu-rN-4M8"/>
-                            <constraint firstItem="Ci3-Zq-xzL" firstAttribute="top" secondItem="rir-nQ-MHm" secondAttribute="bottom" constant="8" symbolic="YES" id="xYh-nM-9nK"/>
-                            <constraint firstItem="rir-nQ-MHm" firstAttribute="top" secondItem="xTE-jl-s1X" secondAttribute="bottom" constant="8" symbolic="YES" id="xtd-Mm-GI6"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="QIs-6i-z9K"/>
                     <connections>
                         <outlet property="firstHzLabel" destination="Cm4-xc-Uh2" id="RfD-r2-beq"/>
                         <outlet property="graphView" destination="Ci3-Zq-xzL" id="tqW-ui-r2o"/>
-                        <outlet property="lock_Hz_button" destination="rir-nQ-MHm" id="jIt-H2-240"/>
                         <outlet property="module_1_desc_button" destination="xTE-jl-s1X" id="PGv-W6-vxb"/>
                         <outlet property="secondHzLabel" destination="17o-EH-G9Y" id="X3u-29-nrB"/>
                     </connections>
@@ -240,52 +226,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rDI-N1-xeL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1562" y="124"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="tne-QT-ifu">
-            <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="AudioLabSwift" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YB8-JK-DSb">
-                                <rect key="frame" x="20" y="48" width="374" height="405"/>
-                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="405" id="gzF-q7-3S9"/>
-                                </constraints>
-                            </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="j2d-ef-Pho">
-                                <rect key="frame" x="20" y="461" width="374" height="146"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="146" id="T3n-o9-0M8"/>
-                                </constraints>
-                                <string key="text">The view above is used as a placholder for the metal graph class to display into. It allows you to manipualte position and size of the graph locations.</string>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="YB8-JK-DSb" secondAttribute="trailing" constant="20" id="07I-rt-aUI"/>
-                            <constraint firstItem="j2d-ef-Pho" firstAttribute="top" secondItem="YB8-JK-DSb" secondAttribute="bottom" constant="8" symbolic="YES" id="4wO-Dq-EiC"/>
-                            <constraint firstItem="YB8-JK-DSb" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="CG7-N7-eeg"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="j2d-ef-Pho" secondAttribute="trailing" constant="20" id="R5b-5d-esr"/>
-                            <constraint firstItem="YB8-JK-DSb" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="ksd-gZ-nu1"/>
-                            <constraint firstItem="j2d-ef-Pho" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="nzJ-WD-5Yk"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" id="bg6-By-oJ3"/>
-                    <connections>
-                        <outlet property="userView" destination="YB8-JK-DSb" id="jNT-uO-aS3"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="968" y="124"/>
         </scene>
     </scenes>
     <resources>

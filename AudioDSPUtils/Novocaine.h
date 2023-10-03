@@ -71,7 +71,7 @@ typedef void (^InputBlock)(float *data, UInt32 numFrames, UInt32 numChannels);
 
 @interface Novocaine : NSObject 
 
-@property AudioUnit audioUnit;
+@property AudioUnit audioUnit; //Added 
 @property AudioBufferList *inputBuffer;
 @property (nonatomic, copy) OutputBlock outputBlock;
 @property (nonatomic, copy) InputBlock inputBlock;
@@ -79,7 +79,7 @@ typedef void (^InputBlock)(float *data, UInt32 numFrames, UInt32 numChannels);
 @property (nonatomic, retain) NSString *inputRoute;
 @property UInt32 numInputChannels;
 @property UInt32 numOutputChannels;
-@property (readonly) Float64 samplingRate;
+@property (readonly) Float64 samplingRate; //Added sampling rate of device 
 @property BOOL isInterleaved;
 @property BOOL isSetUp;
 @property UInt32 numBytesPerSample;

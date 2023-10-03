@@ -111,7 +111,7 @@ static pthread_mutex_t outputAudioFileLock;
 		_inData  = (float *)calloc(8192, sizeof(float)); // probably more than we'll need
         _outData = (float *)calloc(8192, sizeof(float));
         
-        _outputBuffer = (float *)calloc(2*self.samplingRate, sizeof(float));
+        _outputBuffer = (float *)calloc(2*self.samplingRate, sizeof(float)); // Allocate memory for an output buffer of size 2 times self.samplingRate, each element being a float.
         pthread_mutex_init(&outputAudioFileLock, NULL);
         
         _playing = NO;
@@ -364,6 +364,7 @@ static pthread_mutex_t outputAudioFileLock;
     // A small number will get you lower latency audio, but will make your processor work harder
     Float32 preferredBufferSize = 1024.0/self.samplingRate; // 1024/44100 = 0.0232
 
+    //Try to setup a preffered Buffer size and log the results 
     [session setPreferredIOBufferDuration:preferredBufferSize error:&error];
     if(error!=nil){
         NSLog(@"Could not set preferred buffer duration, Error: %@",error.localizedDescription);

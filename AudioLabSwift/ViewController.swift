@@ -6,6 +6,7 @@
 //  Copyright © 2020 Eric Larson. All rights reserved.
 //
 
+//Imports UIKit and Metal 
 import UIKit
 import Metal
 
@@ -16,7 +17,7 @@ import Metal
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
-        super.viewDidLoad()
+        super.viewDidLoad() //Calls the UIViewController viewDidLoad() method 
         
 //        if let graph = self.graph{
 //            graph.setBackgroundColor(r: 0, g: 0, b: 0, a: 1)

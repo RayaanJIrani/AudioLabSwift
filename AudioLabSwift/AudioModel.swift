@@ -83,64 +83,89 @@ class AudioModel {
         }
     }
 
-
-    /// Populate self.peak1Freq and self.peak2Freq with a given windowSize for finding the max value
+    /// The method identifies peaks in the FFT data, then narrows down to the two most prominent peaks.
     public func calcLoudestSounds(windowSize:Int=3){
+        
+        // Initial frequency resolution value
         var freqRes:Float = -10.0
+        
+        // Dictionary to lookup the index of a peak based on its magnitude
         var peakLookup = Dictionary<Float, Int>(minimumCapacity: frozenFftData.count)
         
+        // Array to store detected peaks
         var peaks:[Float] = []
+        
+        // Calculate frequency resolution
         freqRes = Float((self.audioManager?.samplingRate)!) / Float(self.BUFFER_SIZE)
+        
+        // Scan the FFT data to identify peaks using a window
         for i in 0...(frozenFftData.count - windowSize) {
             var maxValue:Float = 0.0
             vDSP_maxv(&frozenFftData + i, 1, &maxValue, vDSP_Length(windowSize))
-
+    
+            // If the maximum value is in the center of the window, it's a peak
             if maxValue == frozenFftData[i + Int(windowSize/2)] {
                 peaks.append(maxValue)
                 peakLookup[maxValue] = i
             }
         }
-
+    
+        // Find the loudest peak
         var peak1:Float = 0.0
         vDSP_maxv(peaks, 1, &peak1, vDSP_Length(peaks.count))
         let peak1Loc = peakLookup[peak1]
+        // Remove the loudest peak to find the second loudest peak next
         peaks = peaks.filter { $0 != peak1 }
         
+        // Find the second loudest peak
         var peak2:Float = 0.0
         vDSP_maxv(peaks, 1, &peak2, vDSP_Length(peaks.count))
         let peak2Loc = peakLookup[peak2]
-
+    
+        // Approximate the actual frequency values of the peaks
         self.peak1Freq = quadraticApprox(peakLocation: peak1Loc!, deltaF: freqRes)
         self.peak2Freq = quadraticApprox(peakLocation: peak2Loc!, deltaF: freqRes)
-        
     }
-    /// Used to approximate the actual peak hz based on the points around the peak
-    private func quadraticApprox(peakLocation:Int,deltaF:Float) -> Float {
+    
+    /// Approximates the frequency of a peak using quadratic interpolation around the peak.
+    /// This provides a more accurate estimation of the peak's true frequency.
+    private func quadraticApprox(peakLocation:Int, deltaF:Float) -> Float {
+        // Magnitudes at and around the peak
         let m1 = frozenFftData[peakLocation-1]
         let m2 = frozenFftData[peakLocation]
         let m3 = frozenFftData[peakLocation + 1]
         
         let f2 = Float(peakLocation) * deltaF
         
+        // Quadratic interpolation formula to approximate peak frequency
         return f2 + ((m1-m2)/(m3 - 2 * m2 + m1)) * (deltaF / 2.0)
     }
-    /// Check if a sufficiently large sound was detected by the microphone (above a certain float threshold for average sin wave)
+    
+    /// Checks if a loud sound, above a specified threshold, has been detected in the time domain data.
     public func isLoudSound(cutoff:Float) -> Bool {
         var maxTimeVal:Float = 0.0
         vDSP_maxv(timeData, 1, &maxTimeVal, vDSP_Length(timeData.count))
+        
+        // Default return value indicating sound isn't loud enough
         var isTrue = false
+        
+        // Compute weighted average of previous maximum values
         var weightedTimeVals:[Float] = prevMaxTimeData
         vDSP_vmul(prevMaxTimeData, 1, weights, 1, &weightedTimeVals, 1, vDSP_Length(prevMaxTimeData.count))
         let wtAvg = vDSP.sum(weightedTimeVals) / weightsSum
-    
+        
+        // Calculate the percentage difference from the current max value to the weighted average
         let pctDiff = (maxTimeVal - wtAvg) / wtAvg
         
-        
+        // If the percentage difference is above the threshold, consider the sound as loud
         if pctDiff > cutoff {
             isTrue = true
+            // "Freeze" the current FFT and time data
             self.frozenFftData = fftData
             self.frozenTimeData = timeData
         }
+        
+        // Store the current max value for future calculations
         prevMaxTimeData.insert(maxTimeVal, at: 0)
         if prevMaxTimeData.count > self.lookback {
             _ = prevMaxTimeData.popLast()
@@ -148,19 +173,25 @@ class AudioModel {
         
         return isTrue
     }
+
     
-    /// Calculate, Return Maximum Decibel Value From FFT Data
+    
+    /// Calculate and return the maximum decibel value from FFT data.
     func getMaxDecibels() -> Float {
-        
-        // Calculate Magnitude For Each Bin
+    
+        // Calculate the magnitude for each bin in the FFT data. This is done by squaring each value, 
+        // which effectively computes the power of the signal at each frequency bin.
         let magnitudes = fftData.map { $0 * $0 }
-
-        // Calculate Decibel Value For Each Magnitude
+    
+        // Convert each magnitude to decibels. The addition of 1e-9 prevents the logarithm from crashing 
+        // due to log of zero. The factor of 20 is used because decibels for power ratios is computed 
+        // as 10*log10, but since we're using amplitude magnitudes (sqrt of power) we multiply by 20.
         let decibels = magnitudes.map { 20.0 * log10(sqrt($0) + 1e-9) }
-
-        // Return Maximum Decibel Value
+    
+        // Return the maximum decibel value. If the decibels array is empty, return negative infinity.
         return decibels.max() ?? -Float.infinity
     }
+
     
     /// Obtain Local Averages (LHS, RHS)
     func localAverages(sliderFreq:Float) -> (Float, Float) {

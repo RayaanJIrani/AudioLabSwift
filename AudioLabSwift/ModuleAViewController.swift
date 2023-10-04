@@ -24,9 +24,10 @@ class ModuleAViewController: UIViewController {
     lazy var graph:MetalGraph? = {
         return MetalGraph(userView: self.graphView)
     }()
+
     
     struct ModuleBAudioConstants {
-        static let AUDIO_BUFFER_SIZE = 1024 * 32
+        static let AUDIO_BUFFER_SIZE = 1024 * 32 //This gives us a buffer size that is large enough for 3Hz accuracy
     }
     
     // Create AudioModel Object With Specified Buffer Size

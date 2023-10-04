@@ -24,7 +24,8 @@ class ModuleBViewController: UIViewController {
     
     // Action When Tone Slider Value Changed
     @IBAction func ToneSliderValueChanged(_ sender: UISlider) {
-        audio.setToneFrequency(sender.value)
+        //Updates the audio tone frequency based of the slider 
+        audio.setToneFrequency(sender.value) 
         
         // Update Slider Label Text With Current Slider Value
         tone_slider_label.text = String(format: "Tone Slider: %.2f kHz", sender.value / 1000.0)
@@ -51,10 +52,14 @@ class ModuleBViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Add Graphs For Display
+        // Add Graphs For Display 
+
+        //This creates the fft graph which displays the fast Fourier transform of the sound
         graph?.addGraph(withName: "fft",
-            shouldNormalizeForFFT: true,
-            numPointsInGraph: ModuleBAudioConstants.AUDIO_BUFFER_SIZE / 2)
+            shouldNormalizeForFFT: true, 
+            numPointsInGraph: ModuleBAudioConstants.AUDIO_BUFFER_SIZE / 2) 
+
+        //Creates the raw audio graph 
         graph?.addGraph(withName: "time",
             numPointsInGraph: ModuleBAudioConstants.AUDIO_BUFFER_SIZE)
         
@@ -68,21 +73,20 @@ class ModuleBViewController: UIViewController {
         // Handle Audio
         audio.play()
         
-        // Run Loop For Updating View Periodically
+        // Code updates the view every 50 milliseconds
         updateViewTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] (updateViewTimer) in
             self?.updateView()
         }
     }
     
-    // Stop Audio, Invalidate Timer Object - Good Practice
-    // To Call Super Function After Local Deallocation
+    //When we exit the screen, calls several methods
     override func viewDidDisappear(_ animated: Bool) {
-        audio.pause()
-        updateViewTimer?.invalidate()
+        audio.pause() 
+        updateViewTimer?.invalidate() 
         super.viewDidDisappear(animated)
     }
     
-    // Run Periodic Updates
+    // Makes function calls needed to update the view 
     @objc func updateView() {
         updateGraphs()
         updateMaxDecibels()

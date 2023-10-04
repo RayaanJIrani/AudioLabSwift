@@ -38,28 +38,51 @@ class AudioModel {
     // MARK: Public Methods
     // ====================
     
-    /// Weight Function For Lookback
+    /// A function to determine the weight of a value based on its position in a lookback sequence.
     private func weightFunc(x:Float, numVals:Int) -> Float{
-        // return Float(((-1 * x) + numVals) / Float(numVals))
+        // Compute and return the weight for a given x based on a total of numVals
+        // This decreases the weight linearly as x approaches numVals.
         return ((-1 * x) + Float(numVals + 1)) / Float(numVals + 1)
     }
-
-    /// Initialize AudioModel With Buffer Size, Lookback Window For Weighted Average Of Previous Sound Values - Anything Not Lazily Instantiated Should Be Allocated Here
+    
+    /// Initializes an AudioModel object.
+    ///
+    /// This initializer is responsible for setting up audio-related data structures
+    /// and precomputing weights based on a lookback window. These weights are 
+    /// presumably used to compute a weighted average of previous sound values.
     init(buffer_size:Int, lookback:Int = 10) {
+        
+        // Set the buffer size to the given value.
         BUFFER_SIZE = buffer_size
+        
+        // Initialize timeData array with zeros to store time domain audio data.
         timeData = Array.init(repeating: 0.0, count: BUFFER_SIZE)
+        
+        // Initialize fftData array with zeros to store frequency domain audio data.
+        // Since FFT output has a symmetric component for real signals, we only store half.
         fftData = Array.init(repeating: 0.0, count: BUFFER_SIZE / 2)
+        
+        // Initialize an empty array to store the weights for the lookback window.
         weights = []
+        
+        // Initialize a variable to keep track of the total sum of weights.
         weightsSum = 0
+        
+        // Initialize arrays to store frozen (possibly unchanging or captured) audio data.
         frozenFftData = []
         frozenTimeData = []
+        
+        // Store the lookback value.
         self.lookback = lookback
+        
+        // Compute and store the weights based on the lookback value.
         for i in 1...lookback {
             let wt = weightFunc(x: Float(i), numVals: lookback)
             weights.append(wt)
             weightsSum += wt
         }
     }
+
 
     /// Populate self.peak1Freq and self.peak2Freq with a given windowSize for finding the max value
     public func calcLoudestSounds(windowSize:Int=3){

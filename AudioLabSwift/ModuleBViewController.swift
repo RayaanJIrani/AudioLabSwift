@@ -104,13 +104,18 @@ class ModuleBViewController: UIViewController {
         decibel_label.text = String(format: "%.2f", audio.getMaxDecibels())
     }
     
-    // Measure Doppler Effect Based On Baseline Calculation
+    // This function determines the Doppler effect based on the difference between left-hand side (LHS) and right-hand side (RHS) averages.
     private func measureDopplerEffect() {
         
-        // Unpack Side Averages From Model Call
+        // Obtain the local averages on both sides of a given frequency (provided by the `tone_slider` value) from the audio model.
+        // `lAvg` is the average on the LHS of the frequency and `rAvg` is the average on the RHS.
         let (lAvg, rAvg) = audio.localAverages(sliderFreq: tone_slider.value)
         
-        // Decide Gesture (Based On Range)
+        // Determine the movement (or lack thereof) based on the difference between `lAvg` and `rAvg`.
+        // If the difference is within a specific range (-3.65 to 6.35), it's determined that the source is "Still".
+        // If the difference is greater than or equal to 6.35, it suggests the source is "Moving Closer!".
+        // Otherwise, the source is determined to be "Moving Farther!".
+        // The values -3.65 and 6.35 were determined from trial & error. 
         if -3.65 < lAvg - rAvg && lAvg - rAvg < 6.35 {
             gesture_label.text = "Still"
         } else if lAvg - rAvg >= 6.35 {
@@ -119,4 +124,5 @@ class ModuleBViewController: UIViewController {
             gesture_label.text = "Moving Farther!"
         }
     }
+
 }

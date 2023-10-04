@@ -54,15 +54,12 @@ class ModuleAViewController: UIViewController {
             self?.runOnInterval()
         }
        
-        //Timer.scheduledTimer(timeInterval: 1.0/20.0, target: self, selector: #selector(runOnInterval), userInfo: nil, repeats: true)
-        
         let updateViewTimer = Timer.scheduledTimer(withTimeInterval: 1.0/20.0, repeats: true) { [weak self] (updateViewTimer) in
             self?.updateView()
         }
     }
     // Function that runs the same times as the audio manager to update the labels
     @objc func runOnInterval(){
-//        print("Hello World")
         
         if audio.isLoudSound(cutoff: 1.0) {
             audio.calcLoudestSounds(windowSize: 3)

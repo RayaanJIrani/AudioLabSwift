@@ -27,7 +27,8 @@ class ModuleAViewController: UIViewController {
 
     
     struct ModuleBAudioConstants {
-        static let AUDIO_BUFFER_SIZE = 1024 * 32 //This gives us a buffer size that is large enough for 3Hz accuracy
+        //This gives us a buffer size that is large enough for 3Hz frequency resolution 
+        static let AUDIO_BUFFER_SIZE = 1024 * 32 
     }
     
     // Create AudioModel Object With Specified Buffer Size

@@ -143,36 +143,50 @@ class AudioModel {
     
     /// Checks if a loud sound, above a specified threshold, has been detected in the time domain data.
     public func isLoudSound(cutoff:Float) -> Bool {
+        // Initializing a variable to store the maximum value from the timeData array.
         var maxTimeVal:Float = 0.0
+    
+        // Using vDSP_maxv to efficiently calculate the maximum value in the timeData array.
         vDSP_maxv(timeData, 1, &maxTimeVal, vDSP_Length(timeData.count))
         
-        // Default return value indicating sound isn't loud enough
+        // Default return value indicating the sound isn't loud enough.
         var isTrue = false
         
-        // Compute weighted average of previous maximum values
+        // Create an array to store the weighted time values.
         var weightedTimeVals:[Float] = prevMaxTimeData
+        
+        // Multiply the previous max time data by the corresponding weight.
+        // This gives a significance to each data point based on its historical position.
         vDSP_vmul(prevMaxTimeData, 1, weights, 1, &weightedTimeVals, 1, vDSP_Length(prevMaxTimeData.count))
+        
+        // Compute the sum of the weighted time values.
         let wtAvg = vDSP.sum(weightedTimeVals) / weightsSum
         
-        // Calculate the percentage difference from the current max value to the weighted average
+        // Calculate the percentage difference between the current max value and the weighted average.
         let pctDiff = (maxTimeVal - wtAvg) / wtAvg
         
-        // If the percentage difference is above the threshold, consider the sound as loud
+        // If the percentage difference exceeds the given cutoff, we determine that a loud sound is detected.
         if pctDiff > cutoff {
             isTrue = true
-            // "Freeze" the current FFT and time data
+            
+            // Save the current FFT and time data to be accessed later (i.e., "freeze" them).
             self.frozenFftData = fftData
             self.frozenTimeData = timeData
         }
         
-        // Store the current max value for future calculations
+        // Update the previous maximum time data array with the current maximum value.
         prevMaxTimeData.insert(maxTimeVal, at: 0)
+        
+        // Ensure the prevMaxTimeData array doesn't grow indefinitely.
+        // Remove the oldest value if it exceeds the lookback length.
         if prevMaxTimeData.count > self.lookback {
             _ = prevMaxTimeData.popLast()
         }
         
+        // Return the result, indicating if a loud sound was detected or not.
         return isTrue
     }
+
 
     
     
@@ -193,23 +207,28 @@ class AudioModel {
     }
 
     
-    /// Obtain Local Averages (LHS, RHS)
+    /// Obtain local averages on both the left-hand side (LHS) and right-hand side (RHS) of a specified frequency in the FFT data.
     func localAverages(sliderFreq:Float) -> (Float, Float) {
         
-        // Calculate FFT Index (Frequency (k) * N / Sampling Frequency)
+        // Convert the provided frequency (from a slider or user input) to an index within the FFT array.
+        // The formula used is: (Frequency (k) * Total FFT Points (N) / Sampling Frequency).
         let index = Int(sliderFreq * Float(BUFFER_SIZE) / Float(self.audioManager!.samplingRate))
         
-        // No. Data Points On RHS / LHS
-        // Chosen For Not Too Much Information
+        // Define the number of data points to be considered on either side of the specified frequency for the average.
+        // This range is set to 20 data points to ensure not too much information is included in the average calculation.
         let range = 20
         
-        // Calculate The Average For LHS / RHS For Specific Frequency (Slider) - Note: Generated With Help From GPT
+        // Calculate the average value of the FFT data on the LHS of the specified frequency.
+        // This is achieved by taking the sum of the FFT values within the range and dividing by the range.
         let lhsAvg = fftData[(index - range)..<index].reduce(0, +) / Float(range)
+        
+        // Similarly, calculate the average value of the FFT data on the RHS of the specified frequency.
         let rhsAvg = fftData[(index + 1)..<(index + range + 1)].reduce(0, +) / Float(range)
         
-        // Return Positive (Easier To Use)
+        // Return the absolute values of both averages (this ensures the values are positive and easier to use in subsequent steps).
         return (abs(lhsAvg), abs(rhsAvg))
     }
+
     
     /// Public Function For Starting Processing Microphone Data
     func startMicrophoneProcessing(withFps:Double) {
